@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="GardenersDelightWebServer" default="war">
+
+	<dirname property="directory.base" file="${ant.file}" />
+
+	<!-- Initialize the Time Stamp -->
+	<tstamp>
+		<format property="YEAR" pattern="yyyy" />
+	</tstamp>
+
+	<dirname property="directory.base" file="${ant.file}" />
+	<property name="directory.WEB-INF" value="${directory.base}/WebContent/WEB-INF" />
+	<property name="directory.lib" value="${directory.WEB-INF}/lib" />
+	<property name="directory.build" value="${directory.base}/build" />
+	<property name="directory.dist" value="${directory.base}/dist" />
+	
+	<!-- Compiler options -->
+	<property name="compiler.debug" value="on" />
+	<property name="compiler.generate.no.warnings" value="off" />
+	<property name="compiler.max.memory" value="128m" />
+
+	<patternset id="compiler.resources">
+		<include name="**/?*.properties" />
+		<include name="**/?*.xml" />
+		<include name="**/?*.gif" />
+		<include name="**/?*.png" />
+		<include name="**/?*.jpeg" />
+		<include name="**/?*.jpg" />
+		<include name="**/?*.html" />
+		<include name="**/?*.dtd" />
+		<include name="**/?*.tld" />
+	</patternset>
+
+	<patternset id="ignored.files">
+		<exclude name="**/.svn/**" />
+	</patternset>
+
+	<path id="compile.classpath">
+		<pathelement location="${directory.build}" />
+		<pathelement location="${directory.build}/classes" />
+		<pathelement location="${directory.lib}/commons-lang-2.6.jar" />
+		<pathelement location="${directory.lib}/jsr311-api-1.1.1.jar" />
+		<pathelement location="${directory.lib}/log4j-1.2.8.jar" />
+		<pathelement location="${directory.lib}/servlet.jar" />
+		<pathelement location="${directory.base}/../libs/commons-httpclient-3.1.jar" />
+			</path>
+
+	<target name="init" description="Build initialization">
+		<!-- Create the time stamp -->
+		<tstamp />
+	</target>
+
+
+	<target name="clean" depends="init" description="Cleans build directories">
+		<delete dir="${directory.dist}" />
+		<mkdir dir="${directory.dist}" />
+		<delete dir="${directory.build}" />
+		<mkdir dir="${directory.build}" />
+		<mkdir dir="${directory.build}/classes" />
+		<mkdir dir="${directory.build}/tests" />
+	</target>
+
+	<target name="compile" depends="clean" description="Compiles all source code for project">
+		<javac includeantruntime="false" destdir="${directory.build}/classes" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}"  fork="true" srcdir="${directory.base}/src">
+			<classpath refid="compile.classpath" />
+			<patternset refid="ignored.files" />
+		</javac>
+
+		<javac includeantruntime="false" destdir="${directory.build}/classes" debug="${compiler.debug}"
+			nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}"
+			fork="true" srcdir="${directory.base}/test">
+			<classpath refid="compile.classpath" />
+			<patternset refid="ignored.files" />
+		</javac>
+
+		<copy todir="${directory.build}/classes">
+			<fileset dir="${directory.base}/src">
+				<patternset refid="compiler.resources" />
+				<type type="file" />
+			</fileset>
+			<fileset dir="${directory.base}/test">
+				<exclude name="java/**" />
+				<patternset refid="compiler.resources" />
+				<type type="file" />
+			</fileset>
+		</copy>
+		<copy todir="${directory.build}/classes">
+			<fileset dir="${directory.base}/src">
+				<exclude name="java/**" />
+				<patternset refid="compiler.resources" />
+				<type type="file" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="war" depends="compile" description="Will build everything and war it up">
+		
+	<!-- 	<copy file="${directory.base}/../CMVMapper/dist/cmv-mapper.jar" todir="${directory.base}/WEB-INF/lib"/>
+		<copy file="${directory.base}/../CMVLenderPingTree/dist/cmv-lender-ping-tree.jar" todir="${directory.base}/WEB-INF/lib"/>
+		<copy file="${directory.base}/../CMVClientRequest/dist/cmv-client-request.jar" todir="${directory.base}/WEB-INF/lib"/>
+		<copy file="${directory.base}/../CMVRulesEngine/dist/cmv-rules-engine.jar" todir="${directory.base}/WEB-INF/lib"/>
+	-->	
+		<war destfile="${directory.dist}/GDelightService.war" webxml="${directory.WEB-INF}/web.xml">
+			<fileset dir="${directory.base}/WebContent">
+				<include name="*.jsp"/>
+				<include name="robots.txt"/>
+							</fileset>
+			<lib dir="${directory.lib}" casesensitive="true">
+				<exclude name="**/servlet.jar" />
+			</lib>
+			<classes dir="${directory.build}/classes" includes="**/*" />
+		</war>
+	</target>
+
+	<target name="junit-tests" depends="clean, compile" description="Tests everything after clean and compile">
+		<junit printsummary="yes" haltonfailure="no">
+			<classpath refid="compile.classpath" />
+
+			<formatter type="xml"/>
+			
+			<batchtest fork="yes" todir="${directory.test.results}">
+				<fileset dir="${directory.base}/test">
+					<include name="**/*Test.java"/>
+				</fileset>
+			</batchtest>
+		</junit>	
+	</target>
+	
+</project>
