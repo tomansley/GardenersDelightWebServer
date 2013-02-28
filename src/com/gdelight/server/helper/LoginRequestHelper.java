@@ -1,11 +1,9 @@
 package com.gdelight.server.helper;
 
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import com.gdelight.domain.base.BaseRequestBean;
 import com.gdelight.domain.base.ErrorException;
-import com.gdelight.domain.base.RequestErrorBean;
 import com.gdelight.server.dao.LoginPostRequestDAO;
 import com.gdelight.server.service.PostServiceException;
 
@@ -21,16 +19,12 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 
 	private static final String RESPONSE = "RESPONSE";
 	private static final String DATA = "DATA";
-	private static final String MESSAGES = "MESSAGES";
-	private static final String MESSAGE = "MESSAGE";
-	private static final String MESSAGENUMBER = "MESSAGENUMBER";
-	private static final String MESSAGEDESC = "MESSAGEDESC";
 
 	private static boolean hasLoadedMessages = false;
 	//private CMVNewLoanBean data = new CMVNewLoanBean();
 
-	public LoginRequestHelper(Document xmlData) {
-		super(xmlData);
+	public LoginRequestHelper(String jsonData) {
+		super(jsonData);
 	}
 
 	//=======================================================================================
@@ -38,9 +32,7 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	//=======================================================================================
 
 	@Override
-	public BaseRequestBean convertXMLToRequestBean() {
-
-		processRequestHeader(null);
+	public BaseRequestBean convertJsonToRequestBean() {
 
 		//processUserData();
 
@@ -59,14 +51,11 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	}
 
 	@Override
-	public StringBuffer convertRequestBeanToXML(BaseRequestBean bean) {
+	public StringBuffer convertRequestBeanToJson(BaseRequestBean bean) {
 
 		StringBuffer responseStr = new StringBuffer();
 
 		responseStr.append("<" + RESPONSE + ">");
-
-		//process response header 
-		responseStr.append(processResponseHeader(bean));
 
 		//process response data
 		//responseStr.append("<" + DATA + ">");
@@ -108,24 +97,6 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 		//	isPosted = false;
 		//}
 		return isPosted;
-	}
-
-	private StringBuffer processRejectedData(BaseRequestBean data){
-
-		StringBuffer responseStr = new StringBuffer();
-
-		if(data.getErrors().size() > 0){
-			responseStr.append("<" + MESSAGES + ">");
-			for (RequestErrorBean bean : data.getErrors()) { 
-				responseStr.append("<" + MESSAGE + ">");
-				responseStr.append("<" + MESSAGENUMBER + ">" + bean.getErrorCode() + "</" + MESSAGENUMBER + ">");
-				responseStr.append("<" + MESSAGEDESC + ">" + bean.getErrorMessage()  + "</" + MESSAGEDESC + ">");
-				responseStr.append("</" + MESSAGE + ">");
-			}
-			responseStr.append("</" + MESSAGES + ">");
-		}
-
-		return responseStr;
 	}
 
 	@Override

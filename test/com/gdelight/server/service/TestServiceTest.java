@@ -39,7 +39,7 @@ public class TestServiceTest {
 			HttpClient httpclient = new HttpClient();
 
 			//make the request
-			int result = httpclient.executeMethod(post);
+			httpclient.executeMethod(post);
 
 			response = post.getResponseBodyAsString();
 

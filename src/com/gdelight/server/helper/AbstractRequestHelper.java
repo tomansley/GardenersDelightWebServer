@@ -1,15 +1,9 @@
 package com.gdelight.server.helper;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import com.gdelight.domain.base.BaseErrorMessages;
 import com.gdelight.domain.base.BaseRequestBean;
 import com.gdelight.domain.base.ErrorException;
 import com.gdelight.server.service.PostServiceException;
-import com.gdelight.tools.date.DateUtils;
-import com.gdelight.tools.xml.XMLUtils;
 
 public abstract class AbstractRequestHelper {
 
@@ -20,13 +14,12 @@ public abstract class AbstractRequestHelper {
 	public static final String TRANSACTIONID = "TRANSACTIONID";
 	public static final String TRANSACTIONTIME = "TRANSACTIONTIME";
 	public static final String EXTERNALID = "EXTERNALID";
-	private static final String STATUS = "STATUS";
 	private static boolean hasLoadedMessages = false;
 
-	protected Document xmlData = null;
+	protected String jsonData = null;
 
-	public AbstractRequestHelper(Document xmlData) {
-		this.xmlData = xmlData;
+	public AbstractRequestHelper(String jsonData) {
+		this.jsonData = jsonData;
 		try {
 			this.initErrorMessages();
 			this.setErrorMessages();
@@ -40,7 +33,7 @@ public abstract class AbstractRequestHelper {
 	 * called and is called before the bean is processed.
 	 * @return a bean that extends BaseRequestBean
 	 */
-	public abstract BaseRequestBean convertXMLToRequestBean();
+	public abstract BaseRequestBean convertJsonToRequestBean();
 	
 	/**
 	 * Method to process the request.  This method gets called after the bean has created via the convertXMLToRequestBean() method.
@@ -54,7 +47,7 @@ public abstract class AbstractRequestHelper {
 	 * @param data the request bean holding the response data.
 	 * @return the XML string 
 	 */
-	public abstract StringBuffer convertRequestBeanToXML(BaseRequestBean data);
+	public abstract StringBuffer convertRequestBeanToJson(BaseRequestBean data);
 
 	protected abstract void setErrorMessages() throws ErrorException;
 	
@@ -81,39 +74,6 @@ public abstract class AbstractRequestHelper {
 
 	protected void addErrorMessage(Integer code, String message) throws ErrorException {
 		BaseErrorMessages.addErrorMessage(code, message);
-	}
-
-	/**
-	 * Method to parse the response header section.
-	 * @param xmlDocument the xml document containing the response header information.
-	 */
-	protected void processRequestHeader(BaseRequestBean data) {
-
-		NodeList nList = xmlData.getElementsByTagName(HEADER);
-		Element eElement = (Element) nList.item(0);
-		
-		data.setTransactionType(XMLUtils.getValueFromElement(TRANSACTION_TYPE, eElement));
-		data.setExternalId(XMLUtils.getValueFromElement(EXTERNALID, eElement));
-
-	}
-
-	protected StringBuffer processResponseHeader(BaseRequestBean data) {
-
-		StringBuffer returnStr = new StringBuffer();
-		
-		returnStr.append("<" + HEADER + ">");
-			returnStr.append("<" + TRANSACTION_TYPE + ">" + data.getTransactionType().getTransactionType() + "</" + TRANSACTION_TYPE + ">");
-			returnStr.append("<" + TRANSACTIONID + ">" + data.getInternalId() + "</" + TRANSACTIONID + ">");
-			returnStr.append("<" + TRANSACTIONTIME + ">" +  DateUtils.convertDateToString(DateUtils.DATE_TIME_FORMAT, data.getRequestTime()) + "</" + TRANSACTIONTIME + ">");
-			returnStr.append("<" + STATUS + ">" + data.getStatus().getStatusType() + "</" + STATUS + ">");
-			
-			NodeList nList = xmlData.getElementsByTagName(HEADER);
-			Element eElement = (Element) nList.item(0);
-			returnStr.append("<" + EXTERNALID + ">" + XMLUtils.getValueFromElement(EXTERNALID, eElement) + "</" + EXTERNALID + ">");
-			
-		returnStr.append("</" + HEADER + ">");
-
-		return returnStr;
 	}
 
 	private void initErrorMessages() throws ErrorException {

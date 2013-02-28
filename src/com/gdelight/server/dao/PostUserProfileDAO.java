@@ -44,7 +44,7 @@ public class PostUserProfileDAO extends BaseDAO {
 	 * @return the list of clients who's license matches the 
 	 * @throws PostServiceException
 	 */
-	public PostUserBean getPostClientFromLicense(String license) throws PostServiceException {
+	public PostUserBean getPostUser(String license) throws PostServiceException {
 		Properties properties = new Properties();
 		properties.setProperty(FIELD_ACTIVE, IS_ACTIVE);
 		properties.setProperty(FIELD_LICENSE, license);
@@ -54,11 +54,11 @@ public class PostUserProfileDAO extends BaseDAO {
 		
 		if (clients.size() != 1) {
 			client = new PostUserBean();
-			client.setLicense(license);
-			client.setLicenseValid(false);
+			client.setEmail(license);
+			client.setEmailValid(false);
 		} else {
 			client = clients.get(0);
-			client.setLicenseValid(true);
+			client.setEmailValid(true);
 		}
 		
 		return client;
@@ -157,7 +157,7 @@ public class PostUserProfileDAO extends BaseDAO {
 				data.setId(rs.getInt(FIELD_ID));
 				data.setName(rs.getString(FIELD_NAME));
 				data.setActive(rs.getBoolean(FIELD_ACTIVE));
-				data.setLicense(rs.getString(FIELD_LICENSE));
+				data.setEmail(rs.getString(FIELD_LICENSE));
 				data.setRevenueShare(rs.getDouble(FIELD_REVENUE_SHARE));
 				data.setAffiliateId(rs.getInt(FIELD_AFFILIATE_ID));
 				data.setDefaultTier(rs.getInt(FIELD_DEFAULT_TIER));

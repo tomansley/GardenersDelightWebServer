@@ -72,27 +72,18 @@ public class PostServiceHelper {
 	 * @param xmlDoc the XML request data
 	 * @return the client bean containing all client information
 	 */
-	public static PostUserBean getPostUser(Document xmlDoc) {
+	public static PostUserBean getPostUser(BaseRequestBean request) {
 		
 		PostUserBean user = null;
 		
 		try {
 			
-			NodeList nList = xmlDoc.getElementsByTagName(AbstractRequestHelper.HEADER);
-			Element eElement = (Element) nList.item(0);
-	
-			String license = XMLUtils.getValueFromElement(AbstractRequestHelper.LICENSE, eElement);
-	
-			if (license == null || license.equals("")) {
-				throw new PostServiceException("No valid license provided");
-			}
-			
 			PostUserProfileDAO dao = new PostUserProfileDAO();
-			user = dao.getPostClientFromLicense(license);
+			user = dao.getPostUser(request.getUserId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			user = new PostUserBean();
-			user.setLicenseValid(false);
+			user.setEmailValid(false);
 		}
 		return user;
 	}

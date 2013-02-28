@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,13 +34,14 @@ public class PostService {
 	private static Logger log = Logger.getLogger(PostService.class);
 
 	@POST
-	public Response postService(String xmlData) {
+	public Response postService(String jsonData) {
 
 		Long startTime = System.currentTimeMillis();
-		log.debug("postService Request - " + xmlData);
-		PostUserBean client = null;
+		log.debug("postService Request - " + jsonData);
+		PostUserBean user = null;
 		StringBuffer response = new StringBuffer();
 		BaseRequestBean data = new StarterRequestBean();
+		
 		AbstractRequestHelper helper = null;
 
 		//first thing we do is make the helper an "error" helper in cases where there 
@@ -52,39 +52,35 @@ public class PostService {
 		try {
 						
 			//replace any ampersands that might exist before parsing
-			xmlData = XMLUtils.escapeIllegalXMLCharacters(xmlData);
+			jsonData = XMLUtils.escapeIllegalXMLCharacters(jsonData);
 			
-			xmlDoc = JsonUtils.parseJSonDocument(xmlData);
+			data = (StarterRequestBean) JsonUtils.parseJSonDocument(jsonData, StarterRequestBean.class);
 
 			//if the XML doc parsed successfully then place into helper
-			((ProcessingErrorRequestHelper) helper).setXMLDocument(xmlDoc);
-			
-			//get the transaction type
-			data.setTransactionType(PostServiceHelper.getTransactionType(xmlDoc));
+			((ProcessingErrorRequestHelper) helper).setJsonDocument(jsonData);
 			
 			//now that we know the transaction type we can create the corresponding bean
 			if (data.getTransactionType() == null) {
 				data.addError(new RequestErrorBean(20002), STATUS_TYPE.REJECTED);
 			} else if (data.getTransactionType().equals(TRANSACTION_TYPE.LOGIN)) {
-				helper = new LoginRequestHelper(xmlDoc);
+				helper = new LoginRequestHelper(jsonData);
 			}
 				
 			//now we can get the client that made the request
 			if (!data.hasErrors()) {
-				client = PostServiceHelper.getPostClient(xmlDoc);
-				if (!client.isLicenseValid()) {
+				user = PostServiceHelper.getPostUser(data);
+				if (!user.isEmailValid()) {
 					data.addError(new RequestErrorBean(20003), STATUS_TYPE.REJECTED);
 				}
 				
 			}
 		
-			//convert XML to bean. After conversion we will have an entirely new bean 
+			//convert Json to bean. After conversion we will have an entirely new bean 
 			//so we need to re-add all the data we previously added to the temp bean
 			if (!data.hasErrors()) {
-				data = helper.convertXMLToRequestBean();
-				data.setRequestTime(new Date(startTime));
+				data = helper.convertJsonToRequestBean();
 				data.getMetrics().setStartTime(startTime);
-				data.setUser(client);
+				data.setUser(user);
 			}
 				
 			//we now have a bean that is fully populated and ready for processing.
@@ -99,22 +95,22 @@ public class PostService {
 			data.addError(new RequestErrorBean(20001, args), STATUS_TYPE.REJECTED);
 		}
 		
-		response = helper.convertRequestBeanToXML(data);
+		response = helper.convertRequestBeanToJson(data);
 
 		//the last thing we do is log the request and response.
 		try {
 			
-			long totalTime = System.currentTimeMillis() - startTime;
-			data.getMetrics().setTotalTime(totalTime);
+			//long totalTime = System.currentTimeMillis() - startTime;
+			//data.getMetrics().setTotalTime(totalTime);
 			
 			//log basic request data
-			PostServiceHelper.addPostRequestResult(data);
+			//PostServiceHelper.addPostRequestResult(data);
 			
 			//log specific request results and metrics.
-			helper.addPostRequestResult(data);
-			helper.addMetricRequestData(data);
+			//helper.addPostRequestResult(data);
+			//helper.addMetricRequestData(data);
 			
-			Properties props = new Properties();
+			//Properties props = new Properties();
 			//props.put(MongoLogger.REQUEST, xmlData);
 			//props.put(MongoLogger.RESPONSE, response.toString());
 			//props.put(MongoLogger.INTERNAL_ID, data.getInternalId());
