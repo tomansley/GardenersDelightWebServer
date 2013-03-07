@@ -8,7 +8,7 @@ import com.gdelight.domain.base.BaseRequestBean;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.dao.BaseDAO;
 
-public class LoginPostRequestDAO extends BaseDAO {
+public class LoginDAO extends BaseDAO {
 
 	public static final String POST_REQUEST_LOGIN = "Login";
 
@@ -67,7 +67,7 @@ public class LoginPostRequestDAO extends BaseDAO {
 //			
 //			}
 			System.out.println(properties);
-			this.addSimpleData(BaseDAO.DB_VIRALMESH, TableNames.POST_USER_PROFILE, properties);
+			this.addSimpleData(TableNames.USER_PROFILE, properties);
 
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -2,18 +2,13 @@ package com.gdelight.server.helper;
 
 import com.gdelight.domain.base.BaseErrorMessages;
 import com.gdelight.domain.base.BaseRequestBean;
+import com.gdelight.domain.base.BaseResponseBean;
 import com.gdelight.domain.base.ErrorException;
 import com.gdelight.server.service.PostServiceException;
 
 public abstract class AbstractRequestHelper {
 
-	public static final String HEADER = "HEADER";
 	public static final String TRANSACTION_TYPE = "TRANSACTIONTYPE";
-	public static final String TEST = "TEST";
-	public static final String LICENSE = "LICENSE";
-	public static final String TRANSACTIONID = "TRANSACTIONID";
-	public static final String TRANSACTIONTIME = "TRANSACTIONTIME";
-	public static final String EXTERNALID = "EXTERNALID";
 	private static boolean hasLoadedMessages = false;
 
 	protected String jsonData = null;
@@ -36,18 +31,18 @@ public abstract class AbstractRequestHelper {
 	public abstract BaseRequestBean convertJsonToRequestBean();
 	
 	/**
-	 * Method to process the request.  This method gets called after the bean has created via the convertXMLToRequestBean() method.
-	 * @param data the data being processed.  This data is received via the posting service and converted from XML.
+	 * Method to process the request.  This method gets called after the bean has been created via the convertJsonToRequestBean() method.
+	 * @param data the data being processed.  This data is received via the posting service and converted from Json.
 	 * @return the request bean holding the new processed information.
 	 */
-	public abstract BaseRequestBean process(BaseRequestBean data);
+	public abstract BaseResponseBean process(BaseRequestBean data);
 	
 	/**
-	 * Method to convert the requests response back to XML format.  This XML is then returned in the response to the client.
+	 * Method to convert the requests response back to Json format.  This Json is then returned in the response to the client.
 	 * @param data the request bean holding the response data.
 	 * @return the XML string 
 	 */
-	public abstract StringBuffer convertRequestBeanToJson(BaseRequestBean data);
+	public abstract String convertResponseBeanToJson(BaseResponseBean data);
 
 	protected abstract void setErrorMessages() throws ErrorException;
 	
@@ -79,9 +74,9 @@ public abstract class AbstractRequestHelper {
 	private void initErrorMessages() throws ErrorException {
 		if (!hasLoadedMessages) {
 			addErrorMessage(20000, "The error is unknown");
-			addErrorMessage(20001, "The XML request could not be correctly parsed.");
+			addErrorMessage(20001, "The Json request could not be correctly parsed.");
 			addErrorMessage(20002, "The transaction type provided is not recognized as a supported transaction type for this service");
-			addErrorMessage(20003, "The license key provided is invalid");
+			addErrorMessage(20003, "The username or password provided is invalid");
 			hasLoadedMessages = true;
 		}
 	}

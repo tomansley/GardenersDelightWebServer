@@ -13,24 +13,23 @@ import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 
-import com.gdelight.domain.user.PostUserBean;
+import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.dao.BaseDAO;
 
-public class PostUserProfileDAO extends BaseDAO {
+public class UserProfileDAO extends BaseDAO {
 
-	public static final String FIELD_ID = "id";
-	public static final String FIELD_NAME = "name";
+	public static final String USERNAME = "username";
+	public static final String PASSWORD = "password";
+	public static final String FIELD_FIRST_NAME = "first_name";
+	public static final String FIELD_LAST_NAME = "last_name";
 	public static final String FIELD_ACTIVE = "active";
-	public static final String FIELD_LICENSE = "license";
-	public static final String FIELD_REVENUE_SHARE = "revenue_share";
-	public static final String FIELD_AFFILIATE_ID = "affiliate_id";
-	public static final String FIELD_DEFAULT_TIER = "default_tier";
+	public static final String FIELD_EMAIL = "email";
 	public static final String IS_ACTIVE = "1";
 	public static final String IS_NOT_ACTIVE = "0";
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(BaseDAO.DATE_TIME_FORMAT);	
-	private static Logger log = Logger.getLogger(PostUserProfileDAO.class);
+	private static Logger log = Logger.getLogger(UserProfileDAO.class);
 
 	static {
 		TimeZone estTimeZone = TimeZone.getTimeZone("CST");
@@ -44,24 +43,24 @@ public class PostUserProfileDAO extends BaseDAO {
 	 * @return the list of clients who's license matches the 
 	 * @throws PostServiceException
 	 */
-	public PostUserBean getPostUser(String license) throws PostServiceException {
+	public UserBean getUser(String email) throws PostServiceException {
 		Properties properties = new Properties();
 		properties.setProperty(FIELD_ACTIVE, IS_ACTIVE);
-		properties.setProperty(FIELD_LICENSE, license);
-		List<PostUserBean> clients = getPostClients(properties);
+		properties.setProperty(FIELD_EMAIL, email);
+		List<UserBean> users = getUsers(properties);
 		
-		PostUserBean client = null;
+		UserBean user = null;
 		
-		if (clients.size() != 1) {
-			client = new PostUserBean();
-			client.setEmail(license);
-			client.setEmailValid(false);
+		if (users.size() != 1) {
+			user = new UserBean();
+			user.setEmail(email);
+			user.setEmailValid(false);
 		} else {
-			client = clients.get(0);
-			client.setEmailValid(true);
+			user = users.get(0);
+			user.setEmailValid(true);
 		}
 		
-		return client;
+		return user;
 	}
 
 	/**
@@ -70,18 +69,44 @@ public class PostUserProfileDAO extends BaseDAO {
 	 * @return a list of PostUserBeans retrieved using the SQL statement.
 	 * @throws PostServiceException if an error was caused while trying to retrieve the data.
 	 */
-	public List<PostUserBean> getAllPostClients() throws PostServiceException {
-		return getPostClients(new Properties());
+	public List<UserBean> getUsers(Properties properties) throws PostServiceException {
+		return getUserBeans(properties);
 	}
+	
+	public UserBean createUser(Properties properties) throws PostServiceException {
+		return createUserBean(properties);
+	}
+	
+	private UserBean createUserBean(Properties props) throws PostServiceException {
+		log.debug("Starting createUserBean");
 
-	/**
-	 * Method which given arguments returns a list of PostUserBeans
-	 * @param properties the arguments given to the SQL statement.
-	 * @return a list of PostUserBeans retrieved using the SQL statement.
-	 * @throws PostServiceException if an error was caused while trying to retrieve the data.
-	 */
-	public List<PostUserBean> getClients(Properties properties) throws PostServiceException {
-		return getPostClients(properties);
+		UserBean user = null;
+		
+		try {
+	
+			StringBuffer sqlBuffer = new StringBuffer("INSERT INTO " + TableNames.USER_PROFILE + " (email, password) VALUES ('" + props.getProperty(USERNAME) + "','" + props.getProperty(PASSWORD) + "')");
+	
+			log.debug("SQL = " + sqlBuffer.toString());
+			
+			PreparedStatement ps = this.getConnection().prepareStatement(sqlBuffer.toString());
+			
+			ps.execute();
+
+			user = new UserBean();
+			user.setEmail(props.getProperty(USERNAME));
+			user.setPassword(props.getProperty(PASSWORD));
+			user.setActive(true);
+			user.setEmailValid(true);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new PostServiceException(e, "Failure while trying to get user data");
+		} finally {
+			close();
+		}
+
+		return user;
+
 	}
 
 	/**
@@ -91,10 +116,10 @@ public class PostUserProfileDAO extends BaseDAO {
 	 * @return a list of PostUserBeans retrieved using the SQL statement.
 	 * @throws PostServiceException if an error was caused while trying to retrieve the data.
 	 */
-	private List<PostUserBean> getPostClients(Properties properties) throws PostServiceException {
-		log.debug("Starting getLenders");
+	private List<UserBean> getUserBeans(Properties properties) throws PostServiceException {
+		log.debug("Starting getUserBeans");
 
-		List<PostUserBean> dataList = null;
+		List<UserBean> dataList = null;
 		try {
 
 			//put the properties into a linked hashmap which is ordered.
@@ -103,7 +128,7 @@ public class PostUserProfileDAO extends BaseDAO {
 				orderedProps.put((String) field, properties.getProperty((String) field));
 			}
 
-			StringBuffer sqlBuffer = new StringBuffer("SELECT * FROM " + TableNames.POST_USER_PROFILE + " clients WHERE true = true AND ");
+			StringBuffer sqlBuffer = new StringBuffer("SELECT * FROM " + TableNames.USER_PROFILE + " users WHERE true = true AND ");
 
 			for (String key: orderedProps.keySet()) {
 				sqlBuffer.append(key + "=? AND ");
@@ -112,7 +137,7 @@ public class PostUserProfileDAO extends BaseDAO {
 			sqlBuffer.delete(sqlBuffer.lastIndexOf("AND"), sqlBuffer.length()); //get rid of the last AND
 
 			log.debug("SQL = " + sqlBuffer.toString());
-			PreparedStatement ps = this.getConnection(BaseDAO.DB_VIRALMESH).prepareStatement(sqlBuffer.toString());
+			PreparedStatement ps = this.getConnection().prepareStatement(sqlBuffer.toString());
 
 			//set the properties into the query
 			int i = 1;
@@ -123,11 +148,11 @@ public class PostUserProfileDAO extends BaseDAO {
 
 			ResultSet rs = ps.executeQuery();
 
-			dataList = getPostUserBeansFromResultSet(rs);
+			dataList = getUserBeansFromResultSet(rs);
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new PostServiceException(e, "Failure while trying to get lender data");
+			throw new PostServiceException(e, "Failure while trying to get user data");
 		} finally {
 			close();
 		}
@@ -141,26 +166,23 @@ public class PostUserProfileDAO extends BaseDAO {
 	 * @return the list of PromoReportData objects.
 	 * @throws PostServiceException if there was an error while translating the result set.
 	 */
-	private static List<PostUserBean> getPostUserBeansFromResultSet(ResultSet rs) throws PostServiceException {
+	private static List<UserBean> getUserBeansFromResultSet(ResultSet rs) throws PostServiceException {
 
-		List<PostUserBean> dataList = new ArrayList<PostUserBean>();
+		List<UserBean> dataList = new ArrayList<UserBean>();
 
 		try {
 
 			//go through the rows adding the data
-			PostUserBean data = null;
+			UserBean data = null;
 
 			while (rs.next()) {
 
-				data = new PostUserBean();
+				data = new UserBean();
 
-				data.setId(rs.getInt(FIELD_ID));
-				data.setName(rs.getString(FIELD_NAME));
+				data.setFirstName(rs.getString(FIELD_FIRST_NAME));
+				data.setLastName(rs.getString(FIELD_LAST_NAME));
 				data.setActive(rs.getBoolean(FIELD_ACTIVE));
-				data.setEmail(rs.getString(FIELD_LICENSE));
-				data.setRevenueShare(rs.getDouble(FIELD_REVENUE_SHARE));
-				data.setAffiliateId(rs.getInt(FIELD_AFFILIATE_ID));
-				data.setDefaultTier(rs.getInt(FIELD_DEFAULT_TIER));
+				data.setEmail(rs.getString(FIELD_EMAIL));
 
 				dataList.add(data);
 
@@ -168,9 +190,9 @@ public class PostUserProfileDAO extends BaseDAO {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new PostServiceException(e, "Failure while trying to get lender beans from result set");
+			throw new PostServiceException(e, "Failure while trying to get user beans from result set");
 		}
-		log.debug("Finished creating list of PostUserBean's and size = " + dataList.size());
+		log.debug("Finished creating list of UserBean's and size = " + dataList.size());
 		return dataList;
 	}
 

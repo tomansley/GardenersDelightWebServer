@@ -25,12 +25,11 @@ public class PostRequestDAO extends BaseDAO {
 		try {
 
 			Properties properties = new Properties();
-			properties.put(FIELD_REQUEST_ID, data.getInternalId());
 			properties.put(FIELD_STATUS, data.getStatus().getStatusType());
 			properties.put(FIELD_REQUEST_TIME, dateFormat.format(data.getRequestTime()));
 			properties.put(FIELD_REQUEST_TOTAL_TIME, data.getMetrics().getTotalTime());
 			
-			this.addSimpleData(BaseDAO.DB_VIRALMESH, TableNames.POST_RESULT_METRICS, properties);
+			this.addSimpleData(TableNames.POST_RESULT_METRICS, properties);
 
 		} catch (Exception e) {
 			e.printStackTrace();

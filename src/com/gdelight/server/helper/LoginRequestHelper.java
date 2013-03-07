@@ -1,80 +1,88 @@
 package com.gdelight.server.helper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.gdelight.domain.base.BaseRequestBean;
+import com.gdelight.domain.base.BaseResponseBean;
 import com.gdelight.domain.base.ErrorException;
-import com.gdelight.server.dao.LoginPostRequestDAO;
+import com.gdelight.domain.item.Item;
+import com.gdelight.domain.item.ItemGroup;
+import com.gdelight.domain.request.LoginRequestBean;
+import com.gdelight.domain.response.LoginResponseBean;
+import com.gdelight.server.dao.LoginDAO;
 import com.gdelight.server.service.PostServiceException;
+import com.gdelight.tools.json.JsonUtils;
 
 /**
- * This class is a helper to perform one task and that is to convert the received XML data into a
- * CMVNewLoanBean and back again.  All fields are populated as necessary on the request.  No rule 
- * checking is performed on the data.
+ * This class is a helper to gather all data after the user has logged in and return it for display on
+ * the home page.  All fields are populated as necessary on the request.
  * @author tomansley
  */
 public class LoginRequestHelper extends AbstractRequestHelper {
 
 	private static Logger log = Logger.getLogger(LoginRequestHelper.class);
 
-	private static final String RESPONSE = "RESPONSE";
-	private static final String DATA = "DATA";
-
 	private static boolean hasLoadedMessages = false;
-	//private CMVNewLoanBean data = new CMVNewLoanBean();
 
 	public LoginRequestHelper(String jsonData) {
 		super(jsonData);
 	}
 
-	//=======================================================================================
-	// Everything below this line is for processing an XML REQUEST into a BaseRequestBean 
-	//=======================================================================================
-
 	@Override
 	public BaseRequestBean convertJsonToRequestBean() {
 
-		//processUserData();
+		BaseRequestBean request = new LoginRequestBean();
 
-		return null;
+		return request;
 	}
 
 	@Override
-	public BaseRequestBean process(BaseRequestBean dataInput) {
+	public BaseResponseBean process(BaseRequestBean dataInput) {
 
-		//CMVNewLoanBean data = (CMVNewLoanBean) dataInput;
-
-		//perform logic here for login
-		//...
+		//no processing required yet as login is performed earlier for all requests.
 		
-		return null;
+		LoginRequestBean request = (LoginRequestBean) dataInput;
+		
+		LoginResponseBean response = new LoginResponseBean();
+		return response;
 	}
 
 	@Override
-	public StringBuffer convertRequestBeanToJson(BaseRequestBean bean) {
+	public String convertResponseBeanToJson(BaseResponseBean bean) {
 
-		StringBuffer responseStr = new StringBuffer();
+		LoginResponseBean response = new LoginResponseBean();
+		
+		List<ItemGroup> available = new ArrayList<ItemGroup>();
+		
+		ItemGroup group = new ItemGroup();
+		group.setName("Seeds");
+		
+		Item seeds = new Item();
+		seeds.setName("Awesome Apple Seeds");
+		seeds.setAmount("Lots");
+		group.addItem(seeds);
+				
+		seeds = new Item();
+		seeds.setName("Awesome Cherry Seeds");
+		seeds.setAmount("Little");
+		group.addItem(seeds);
+		
+		available.add(group);
 
-		responseStr.append("<" + RESPONSE + ">");
-
-		//process response data
-		//responseStr.append("<" + DATA + ">");
-		//if (bean.getStatus().equals(BaseRequestBean.STATUS_TYPE.ACCEPTED)) {
-		//	responseStr.append(processAcceptedData((CMVNewLoanBean) bean));
-		//} else if (bean.getStatus().equals(BaseRequestBean.STATUS_TYPE.REJECTED)
-		//		|| bean.getStatus().equals(BaseRequestBean.STATUS_TYPE.DECLINED)) {
-		//	responseStr.append(processRejectedData(bean));
-		//}
-		responseStr.append("</" + DATA + ">");
-		responseStr.append("</" + RESPONSE + ">");
-
-		return responseStr;
+		response.setAvailable(available);
+		
+		String json = JsonUtils.getJSonDocument(response);
+		
+		return json;
 	}
 
 	@Override
 	public boolean addPostRequestResult(BaseRequestBean data) {
 		boolean isPosted = true;
-		LoginPostRequestDAO dao = new LoginPostRequestDAO();
+		LoginDAO dao = new LoginDAO();
 		try {
 			dao.addPostRequestResults(data);
 		} catch (PostServiceException e) {

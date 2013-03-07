@@ -1,6 +1,7 @@
 package com.gdelight.server.helper;
 
 import com.gdelight.domain.base.BaseRequestBean;
+import com.gdelight.domain.base.BaseResponseBean;
 import com.gdelight.domain.base.ErrorException;
 
 /**
@@ -22,9 +23,9 @@ public class ProcessingErrorRequestHelper extends AbstractRequestHelper {
 	}
 
 	@Override
-	public StringBuffer convertRequestBeanToJson(BaseRequestBean data) {
+	public String convertResponseBeanToJson(BaseResponseBean data) {
 
-		StringBuffer responseStr = new StringBuffer();
+		String responseStr = new String();
 
 		return responseStr;
 	}
@@ -40,7 +41,7 @@ public class ProcessingErrorRequestHelper extends AbstractRequestHelper {
 	}
 
 	@Override
-	public BaseRequestBean process(BaseRequestBean dataInput) {
+	public BaseResponseBean process(BaseRequestBean dataInput) {
 		return null;
 	}
 

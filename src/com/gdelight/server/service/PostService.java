@@ -18,13 +18,17 @@ import org.apache.log4j.Logger;
 import com.gdelight.domain.base.BaseRequestBean;
 import com.gdelight.domain.base.BaseRequestBean.STATUS_TYPE;
 import com.gdelight.domain.base.BaseRequestBean.TRANSACTION_TYPE;
+import com.gdelight.domain.base.BaseResponseBean;
 import com.gdelight.domain.base.RequestErrorBean;
 import com.gdelight.domain.base.StarterRequestBean;
-import com.gdelight.domain.user.PostUserBean;
+import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.helper.AbstractRequestHelper;
+import com.gdelight.server.helper.FindAvailableRequestHelper;
 import com.gdelight.server.helper.LoginRequestHelper;
+import com.gdelight.server.helper.MakeAvailableRequestHelper;
 import com.gdelight.server.helper.PostServiceHelper;
 import com.gdelight.server.helper.ProcessingErrorRequestHelper;
+import com.gdelight.server.helper.SignupRequestHelper;
 import com.gdelight.tools.json.JsonUtils;
 import com.gdelight.tools.xml.XMLUtils;
 
@@ -38,64 +42,72 @@ public class PostService {
 
 		Long startTime = System.currentTimeMillis();
 		log.debug("postService Request - " + jsonData);
-		PostUserBean user = null;
-		StringBuffer response = new StringBuffer();
-		BaseRequestBean data = new StarterRequestBean();
+		UserBean user = null;
+		String responseStr = null;
+		BaseRequestBean request = new StarterRequestBean();
+		BaseResponseBean response = null;
 		
 		AbstractRequestHelper helper = null;
 
 		//first thing we do is make the helper an "error" helper in cases where there 
 		//is an early stage error and we have not instantiated an associated helper class.
 		helper = new ProcessingErrorRequestHelper(null);
-		data.setRequestTime(new Date(startTime));
+		request.setRequestTime(new Date(startTime));
 
 		try {
 						
 			//replace any ampersands that might exist before parsing
 			jsonData = XMLUtils.escapeIllegalXMLCharacters(jsonData);
 			
-			data = (StarterRequestBean) JsonUtils.parseJSonDocument(jsonData, StarterRequestBean.class);
+			request = (StarterRequestBean) JsonUtils.parseJSonDocument(jsonData, StarterRequestBean.class);
 
 			//if the XML doc parsed successfully then place into helper
 			((ProcessingErrorRequestHelper) helper).setJsonDocument(jsonData);
 			
 			//now that we know the transaction type we can create the corresponding bean
-			if (data.getTransactionType() == null) {
-				data.addError(new RequestErrorBean(20002), STATUS_TYPE.REJECTED);
-			} else if (data.getTransactionType().equals(TRANSACTION_TYPE.LOGIN)) {
+			if (request.getTransactionType() == null) {
+				request.addError(new RequestErrorBean(20002), STATUS_TYPE.REJECTED);
+			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.LOGIN)) {
 				helper = new LoginRequestHelper(jsonData);
+			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.MAKE_AVAILABLE)) {
+				helper = new MakeAvailableRequestHelper(jsonData);
+			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.FIND_AVAILABLE)) {
+				helper = new FindAvailableRequestHelper(jsonData);
+			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.SIGNUP)) {
+				helper = new SignupRequestHelper(jsonData);
 			}
+
 				
-			//now we can get the client that made the request
-			if (!data.hasErrors()) {
-				user = PostServiceHelper.getPostUser(data);
+			//now we can get the user that made the request
+			if (!request.hasErrors() && request.getTransactionType() != TRANSACTION_TYPE.SIGNUP) {
+				user = PostServiceHelper.getPostUser(request);
 				if (!user.isEmailValid()) {
-					data.addError(new RequestErrorBean(20003), STATUS_TYPE.REJECTED);
+					request.addError(new RequestErrorBean(20003), STATUS_TYPE.REJECTED);
 				}
 				
 			}
 		
 			//convert Json to bean. After conversion we will have an entirely new bean 
 			//so we need to re-add all the data we previously added to the temp bean
-			if (!data.hasErrors()) {
-				data = helper.convertJsonToRequestBean();
-				data.getMetrics().setStartTime(startTime);
-				data.setUser(user);
+			if (!request.hasErrors()) {
+				request = helper.convertJsonToRequestBean();
+				request.getMetrics().setStartTime(startTime);
+				request.setUser(user);
 			}
 				
 			//we now have a bean that is fully populated and ready for processing.
-			if (!data.hasErrors()) {
-				data = helper.process(data);
+			if (!request.hasErrors()) {
+				response = helper.process(request);
 			}
 	
 		} catch (Exception e) {
 			e.printStackTrace();
 			List<String> args = new ArrayList<String>();
 			args.add(ExceptionUtils.getStackTrace(e));
-			data.addError(new RequestErrorBean(20001, args), STATUS_TYPE.REJECTED);
+			request.addError(new RequestErrorBean(20001, args), STATUS_TYPE.REJECTED);
 		}
 		
-		response = helper.convertRequestBeanToJson(data);
+		responseStr = helper.convertResponseBeanToJson(response);
 
 		//the last thing we do is log the request and response.
 		try {
@@ -120,9 +132,9 @@ public class PostService {
 			
 		} catch (Exception e) { e.printStackTrace(); }
 	
-		log.debug("Response - " + response.toString());
+		log.debug("Response - " + responseStr);
 		
-		return Response.status(201).entity(response.toString()).build();
+		return Response.status(201).entity(responseStr).build();
 
 	}
 	
