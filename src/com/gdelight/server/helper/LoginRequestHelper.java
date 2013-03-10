@@ -110,8 +110,8 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	@Override
 	protected void setErrorMessages() throws ErrorException {
 		if (!hasLoadedMessages) {
-			this.addErrorMessage(20203, "The request XML is invalid.  No 'USER' node is present. One 'USER' node is required for processing");
-			this.addErrorMessage(20207, "This is a test error message.  The request was designed to fail");
+			this.addErrorMessage(00101, "The request XML is invalid.  No 'USER' node is present. One 'USER' node is required for processing");
+			this.addErrorMessage(00102, "This is a test error message.  The request was designed to fail");
 			hasLoadedMessages = true;
 		}
 	}

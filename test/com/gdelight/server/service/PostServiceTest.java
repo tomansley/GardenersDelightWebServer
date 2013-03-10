@@ -24,7 +24,7 @@ public class PostServiceTest {
 		
 		String type = "internal";
 		String email = "tomansley@gmail.com" + System.currentTimeMillis();
-		//this.email = email;
+
 		if (type.equals("external")) {
 			TestExternal();
 		} else {
@@ -38,49 +38,67 @@ public class PostServiceTest {
 	
 	public static void TestSignupInternal(String email) {
 		
+		log.debug("----------------------------------------------------------------------------------------------");
 		String jsonData = "{\"transactionType\":\"SIGNUP\"," +
 				   "\"userId\":\"" + email + "\"," +
-				   "\"password\":\"password\"}";
+				   "\"token\":\"password\"," +
+			   	   "\"latitude\":\"41.866381\"," +
+			       "\"longitude\":\"-87.621374\"}";
 
 		makeRequest(jsonData);
+		log.debug("----------------------------------------------------------------------------------------------");
 	}
 	
 	public static void TestLoginInternal(String email) {
 		
+		log.debug("----------------------------------------------------------------------------------------------");
 		String jsonData = "{\"transactionType\":\"LOGIN\"," +
 						   "\"userId\":\"" + email + "\"," +
-						   "\"password\":\"password\"}";
+						   "\"token\":\"password\"}";
 		
 		makeRequest(jsonData);
-		
+		log.debug("----------------------------------------------------------------------------------------------");
 	}
 	
 	public static void TestMakeAvailableInternal(String email) {
 		
+		log.debug("----------------------------------------------------------------------------------------------");
 		String jsonData = "{\"transactionType\":\"MAKE_AVAILABLE\"," +
 				   		  "\"userId\":\"" + email + "\"," +
-				   		  "\"password\":\"password\"," +
+				   		  "\"token\":\"password\"," +
+				   		  "\"latitude\":\"41.866381\"," +
+				   		  "\"longitude\":\"-87.621374\"," +
 				   		  "\"available\":[" +
-				   				"{\"name\":\"Seeds\",\"items\":[" +
+				   				"{\"name\":\"Seeds\",\"location\":\"Main Location\",\"items\":[" +
 				   					"{\"amount\":\"Lots\",\"name\":\"Pear Seeds\"}," +
 				   					"{\"amount\":\"Some\",\"name\":\"Apple Seeds\"}]" +
-				   				"}]" +
+				   				"}," +
+				   				"{\"name\":\"Fruits\",\"location\":\"Main Location\",\"items\":[" +
+			   						"{\"amount\":\"Little\",\"name\":\"Apples\",\"subGroup\":\"Braeburn\"}," +
+			   						"{\"amount\":\"Lots\",\"name\":\"Oranges\",\"subGroup\":\"Gardner\"}]" +
+			   					"}]" +
 				   		  "}";
 
 		makeRequest(jsonData);
+		log.debug("----------------------------------------------------------------------------------------------");
 	}
 	
 	public static void TestFindAvailableInternal(String email) {
 		
+		log.debug("----------------------------------------------------------------------------------------------");
 		String jsonData = "{\"transactionType\":\"FIND_AVAILABLE\"," +
 				   		  "\"userId\":\"" + email + "\"," +
-				   		  "\"password\":\"password\"," +
+				   		  "\"token\":\"password\"," +
+				   		  "\"latitude\":\"41.866381\"," +
+				   		  "\"longitude\":\"-87.621374\"," +
+				   		  "\"radius\":\"3\"," +
 				   		  "\"findItems\":[" +
-				   				"{\"amount\":\"Lots\",\"name\":\"Pear Seeds\"}," +
-				   				"{\"amount\":\"Some\",\"name\":\"Apple Seeds\"}]" +
+								"{\"name\":\"Apples\",\"subGroup\":\"\"}," +
+								"{\"name\":\"Oranges\",\"subGroup\":\"Gardner\"}]" +
 				   		  "}";
 
 		makeRequest(jsonData);
+		log.debug("----------------------------------------------------------------------------------------------");
 	}
 	
 	private static String makeRequest(String data) {

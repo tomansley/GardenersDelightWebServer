@@ -25,6 +25,9 @@ public class UserProfileDAO extends BaseDAO {
 	public static final String FIELD_LAST_NAME = "last_name";
 	public static final String FIELD_ACTIVE = "active";
 	public static final String FIELD_EMAIL = "email";
+	public static final String FIELD_PASSWORD = "password";
+	public static final String FIELD_LONGITUDE = "longitude";
+	public static final String FIELD_LATITUDE = "latitude";
 	public static final String IS_ACTIVE = "1";
 	public static final String IS_NOT_ACTIVE = "0";
 
@@ -43,10 +46,11 @@ public class UserProfileDAO extends BaseDAO {
 	 * @return the list of clients who's license matches the 
 	 * @throws PostServiceException
 	 */
-	public UserBean getUser(String email) throws PostServiceException {
+	public UserBean getUser(String email, String password) throws PostServiceException {
 		Properties properties = new Properties();
 		properties.setProperty(FIELD_ACTIVE, IS_ACTIVE);
 		properties.setProperty(FIELD_EMAIL, email);
+		properties.setProperty(FIELD_PASSWORD, password);
 		List<UserBean> users = getUsers(properties);
 		
 		UserBean user = null;
@@ -54,13 +58,32 @@ public class UserProfileDAO extends BaseDAO {
 		if (users.size() != 1) {
 			user = new UserBean();
 			user.setEmail(email);
-			user.setEmailValid(false);
+			user.setTokenValid(false);
 		} else {
 			user = users.get(0);
-			user.setEmailValid(true);
+			user.setTokenValid(true);
 		}
 		
 		return user;
+	}
+
+	/**
+	 * Method which given an email address indicates whether that email address can be used for an account.
+	 * @param email the email to be verified.
+	 * @return true = email available, false = email not available 
+	 * @throws PostServiceException
+	 */
+	public Boolean isUsernameAvailable(String email) throws PostServiceException {
+		Properties properties = new Properties();
+		properties.setProperty(FIELD_EMAIL, email);
+		List<UserBean> users = getUsers(properties);
+		Boolean isAvailable = false;
+		
+		if (users.size() == 0) {
+			isAvailable = true;
+		}
+		
+		return isAvailable;
 	}
 
 	/**
@@ -84,19 +107,37 @@ public class UserProfileDAO extends BaseDAO {
 		
 		try {
 	
-			StringBuffer sqlBuffer = new StringBuffer("INSERT INTO " + TableNames.USER_PROFILE + " (email, password) VALUES ('" + props.getProperty(USERNAME) + "','" + props.getProperty(PASSWORD) + "')");
+			StringBuffer sqlBuffer = new StringBuffer("INSERT INTO " + DatabaseNames.USER_PROFILE + " (email, password, longitude, latitude) VALUES ('" + 
+				props.getProperty(USERNAME) + "','" + 
+				props.getProperty(PASSWORD) + "'," +
+				props.get(FIELD_LONGITUDE) + "," +
+				props.get(FIELD_LATITUDE) + ")");
 	
 			log.debug("SQL = " + sqlBuffer.toString());
 			
 			PreparedStatement ps = this.getConnection().prepareStatement(sqlBuffer.toString());
 			
 			ps.execute();
-
+			
+			sqlBuffer = new StringBuffer("INSERT INTO " + DatabaseNames.USER_LOCATION + " (email, type, longitude, latitude) VALUES ('" + 
+					props.getProperty(USERNAME) + "','Main Location'," +
+					props.get(FIELD_LONGITUDE) + "," +
+					props.get(FIELD_LATITUDE) + ")");
+		
+			log.debug("SQL = " + sqlBuffer.toString());
+			
+			ps = this.getConnection().prepareStatement(sqlBuffer.toString());
+			
+			ps.execute();
+				
 			user = new UserBean();
 			user.setEmail(props.getProperty(USERNAME));
-			user.setPassword(props.getProperty(PASSWORD));
+			user.setToken(props.getProperty(PASSWORD));
+			user.setLatitude((Double) props.get(FIELD_LATITUDE));
+			user.setLongitude((Double) props.get(FIELD_LONGITUDE));
+			user.setToken(props.getProperty(PASSWORD));
 			user.setActive(true);
-			user.setEmailValid(true);
+			user.setTokenValid(true);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -128,7 +169,7 @@ public class UserProfileDAO extends BaseDAO {
 				orderedProps.put((String) field, properties.getProperty((String) field));
 			}
 
-			StringBuffer sqlBuffer = new StringBuffer("SELECT * FROM " + TableNames.USER_PROFILE + " users WHERE true = true AND ");
+			StringBuffer sqlBuffer = new StringBuffer("SELECT * FROM " + DatabaseNames.USER_PROFILE + " users WHERE true = true AND ");
 
 			for (String key: orderedProps.keySet()) {
 				sqlBuffer.append(key + "=? AND ");
@@ -183,6 +224,8 @@ public class UserProfileDAO extends BaseDAO {
 				data.setLastName(rs.getString(FIELD_LAST_NAME));
 				data.setActive(rs.getBoolean(FIELD_ACTIVE));
 				data.setEmail(rs.getString(FIELD_EMAIL));
+				data.setLatitude(rs.getDouble(FIELD_LATITUDE));
+				data.setLongitude(rs.getDouble(FIELD_LONGITUDE));
 
 				dataList.add(data);
 

@@ -67,7 +67,7 @@ public class LoginDAO extends BaseDAO {
 //			
 //			}
 			System.out.println(properties);
-			this.addSimpleData(TableNames.USER_PROFILE, properties);
+			this.addSimpleData(DatabaseNames.USER_PROFILE, properties);
 
 		} catch (Exception e) {
 			e.printStackTrace();

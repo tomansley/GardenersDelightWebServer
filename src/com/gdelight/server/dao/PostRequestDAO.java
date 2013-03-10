@@ -6,10 +6,11 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import com.gdelight.domain.base.BaseRequestBean;
+import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.dao.BaseDAO;
 
-public class PostRequestDAO extends BaseDAO {
+public class PostRequestDAO extends AbstractGDelightDAO {
 
 	public static final String FIELD_ID = "id";
 	public static final String FIELD_REQUEST_ID = "request_id";
@@ -21,6 +22,10 @@ public class PostRequestDAO extends BaseDAO {
 	private static Logger log = Logger.getLogger(PostRequestDAO.class);
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(BaseDAO.DATE_TIME_FORMAT);	
 
+	public PostRequestDAO(UserBean user) throws PostServiceException {
+		super(user);
+	}
+	
 	public void addPostRequestResults(BaseRequestBean data) throws PostServiceException {
 		try {
 
@@ -29,7 +34,7 @@ public class PostRequestDAO extends BaseDAO {
 			properties.put(FIELD_REQUEST_TIME, dateFormat.format(data.getRequestTime()));
 			properties.put(FIELD_REQUEST_TOTAL_TIME, data.getMetrics().getTotalTime());
 			
-			this.addSimpleData(TableNames.POST_RESULT_METRICS, properties);
+			this.addSimpleData(DatabaseNames.POST_RESULT_METRICS, properties);
 
 		} catch (Exception e) {
 			e.printStackTrace();

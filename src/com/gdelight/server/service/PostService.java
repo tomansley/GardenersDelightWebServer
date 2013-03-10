@@ -76,12 +76,11 @@ public class PostService {
 			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.SIGNUP)) {
 				helper = new SignupRequestHelper(jsonData);
 			}
-
 				
-			//now we can get the user that made the request
+			//now we can ensure its a valid user and get their details
 			if (!request.hasErrors() && request.getTransactionType() != TRANSACTION_TYPE.SIGNUP) {
 				user = PostServiceHelper.getPostUser(request);
-				if (!user.isEmailValid()) {
+				if (!user.isTokenValid()) {
 					request.addError(new RequestErrorBean(20003), STATUS_TYPE.REJECTED);
 				}
 				

@@ -16,7 +16,7 @@ public class PostServiceHelper {
 	 * @throws CMVPostServiceException
 	 */
 	public static void addPostRequestResult(BaseRequestBean data) throws PostServiceException {
-		PostRequestDAO dao = new PostRequestDAO();
+		PostRequestDAO dao = new PostRequestDAO(data.getUser());
 		dao.addPostRequestResults(data);
 	}
 	
@@ -34,11 +34,11 @@ public class PostServiceHelper {
 		try {
 			
 			UserProfileDAO dao = new UserProfileDAO();
-			user = dao.getUser(request.getUserId());
+			user = dao.getUser(request.getUserId(), request.getToken());
 		} catch (Exception e) {
 			e.printStackTrace();
 			user = new UserBean();
-			user.setEmailValid(false);
+			user.setTokenValid(false);
 		}
 		return user;
 	}
