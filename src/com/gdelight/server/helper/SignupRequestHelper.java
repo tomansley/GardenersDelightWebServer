@@ -1,41 +1,37 @@
 package com.gdelight.server.helper;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
 import com.gdelight.domain.base.BaseRequestBean;
 import com.gdelight.domain.base.BaseResponseBean;
 import com.gdelight.domain.base.BaseResponseBean.STATUS_TYPE;
 import com.gdelight.domain.base.ErrorException;
-import com.gdelight.domain.item.Item;
-import com.gdelight.domain.item.ItemGroup;
-import com.gdelight.domain.request.LoginRequestBean;
-import com.gdelight.domain.response.LoginResponseBean;
-import com.gdelight.server.dao.LoginDAO;
+import com.gdelight.domain.base.RequestErrorBean;
+import com.gdelight.domain.request.SignupRequestBean;
+import com.gdelight.domain.response.SignupResponseBean;
+import com.gdelight.domain.user.UserBean;
+import com.gdelight.server.dao.SignupDAO;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.json.JsonUtils;
 
 /**
- * This class is a helper to gather all data after the user has logged in and return it for display on
- * the home page.  All fields are populated as necessary on the request.
+ * This class is a helper to sign a new user up.
  * @author tomansley
  */
-public class LoginRequestHelper extends AbstractRequestHelper {
+public class SignupRequestHelper extends AbstractRequestHelper {
 
-	private static Logger log = Logger.getLogger(LoginRequestHelper.class);
+	private static Logger log = Logger.getLogger(SignupRequestHelper.class);
 
 	private static boolean hasLoadedMessages = false;
 
-	public LoginRequestHelper(String jsonData) {
+	public SignupRequestHelper(String jsonData) {
 		super(jsonData);
 	}
 
 	@Override
 	public BaseRequestBean convertJsonToRequestBean() {
 
-		BaseRequestBean request = new LoginRequestBean();
+		BaseRequestBean request = (SignupRequestBean) JsonUtils.parseJSonDocument(jsonData, SignupRequestBean.class);
 
 		return request;
 	}
@@ -43,47 +39,51 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	@Override
 	public BaseResponseBean process(BaseRequestBean dataInput) {
 
-		//no processing required yet as login is performed earlier for all requests.
+		SignupRequestBean data = (SignupRequestBean) dataInput;
+		SignupResponseBean response = new SignupResponseBean();
+				
+		SignupDAO dao = new SignupDAO();
 		
-		LoginRequestBean request = (LoginRequestBean) dataInput;
+		try {
+			
+			//if username is available
+			if (dao.isUsernameAvailable(data.getUserId())) {
+				
+				//create new user
+				UserBean user = dao.createUser(data.getUserId(), data.getToken(), data.getLatitude(), data.getLongitude());
+				
+				//everything is good so set success status.
+				response.setStatus(STATUS_TYPE.SUCCESS);
+				response.setUser(user);
+
+			} else {
+				
+				//problem so throw an error.
+				response.setStatus(STATUS_TYPE.FAILED);
+				response.addError(new RequestErrorBean(00401));
+			}
+			
+		} catch (PostServiceException e) {
+			response.addError(new RequestErrorBean(00402));
+		}
 		
-		LoginResponseBean response = new LoginResponseBean();
-		response.setUser(request.getUser());
 		return response;
 	}
 
 	@Override
 	public BaseResponseBean processErrorResponse(BaseRequestBean data) {
-		LoginResponseBean response = new LoginResponseBean();
+		SignupResponseBean response = new SignupResponseBean();
 		response.setUser(data.getUser());
 		response.setErrors(data.getErrors());
 		response.setStatus(STATUS_TYPE.FAILED);
 		return response;
 	}
-
+	
 	@Override
 	public String convertResponseBeanToJson(BaseResponseBean bean) {
-
-		LoginResponseBean response = (LoginResponseBean) bean;
 		
-		List<ItemGroup> available = new ArrayList<ItemGroup>();
+		SignupResponseBean response = (SignupResponseBean) bean;
 		
-		ItemGroup group = new ItemGroup();
-		group.setName("Seeds");
-		
-		Item seeds = new Item();
-		seeds.setName("Awesome Apple Seeds");
-		seeds.setAmount("Lots");
-		group.addItem(seeds);
-				
-		seeds = new Item();
-		seeds.setName("Awesome Cherry Seeds");
-		seeds.setAmount("Little");
-		group.addItem(seeds);
-		
-		available.add(group);
-
-		response.setAvailable(available);
 		
 		String json = JsonUtils.getJSonDocument(response);
 		
@@ -93,7 +93,7 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	@Override
 	public boolean addPostRequestResult(BaseRequestBean data) {
 		boolean isPosted = true;
-		LoginDAO dao = new LoginDAO();
+		SignupDAO dao = new SignupDAO();
 		try {
 			dao.addPostRequestResults(data);
 		} catch (PostServiceException e) {
@@ -121,8 +121,8 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	@Override
 	protected void setErrorMessages() throws ErrorException {
 		if (!hasLoadedMessages) {
-			this.addErrorMessage(00101, "The request XML is invalid.  No 'USER' node is present. One 'USER' node is required for processing");
-			this.addErrorMessage(00102, "This is a test error message.  The request was designed to fail");
+			this.addErrorMessage(00401, "The username already exists");
+			this.addErrorMessage(00402, "There was an error whilst trying to create the account");
 			hasLoadedMessages = true;
 		}
 	}

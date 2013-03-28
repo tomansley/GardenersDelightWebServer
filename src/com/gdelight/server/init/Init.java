@@ -8,16 +8,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
 public class Init extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static Logger log = Logger.getLogger(Init.class);
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		//System.setProperty("JDBC_CONNECTION_STRING", "jdbc:mysql://localhost:3306/gdelight?user=root&password=");
+		System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 	}
 
 

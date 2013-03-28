@@ -20,5 +20,11 @@
         <servlet-name>TestService</servlet-name>
         <url-pattern>/services/*</url-pattern>
     </servlet-mapping>
+    
+	<servlet>
+      <servlet-name>Init</servlet-name>
+      <servlet-class>com.gdelight.server.init.Init</servlet-class>
+      <load-on-startup>1</load-on-startup>
+    </servlet>
   
 </web-app>

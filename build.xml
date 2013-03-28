@@ -43,6 +43,8 @@
 		<pathelement location="${directory.lib}/log4j-1.2.8.jar" />
 		<pathelement location="${directory.lib}/servlet.jar" />
 		<pathelement location="${directory.lib}/commons-httpclient-3.1.jar" />
+		<pathelement location="${directory.base}/../GardenersDelightTools/dist/gdelight-tools.jar" />
+		<pathelement location="${directory.base}/../GardenersDelightDomainObjects/dist/gdelight-domain-objects.jar" />
 	</path>
 
 	<target name="init" description="Build initialization">
@@ -61,6 +63,7 @@
 	</target>
 
 	<target name="compile" depends="clean" description="Compiles all source code for project">
+		
 		<javac includeantruntime="false" destdir="${directory.build}/classes" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}"  fork="true" srcdir="${directory.base}/src">
 			<classpath refid="compile.classpath" />
 			<patternset refid="ignored.files" />
@@ -95,11 +98,10 @@
 
 	<target name="war" depends="compile" description="Will build everything and war it up">
 		
-	<!-- 	<copy file="${directory.base}/../CMVMapper/dist/cmv-mapper.jar" todir="${directory.base}/WEB-INF/lib"/>
-		<copy file="${directory.base}/../CMVLenderPingTree/dist/cmv-lender-ping-tree.jar" todir="${directory.base}/WEB-INF/lib"/>
-		<copy file="${directory.base}/../CMVClientRequest/dist/cmv-client-request.jar" todir="${directory.base}/WEB-INF/lib"/>
-		<copy file="${directory.base}/../CMVRulesEngine/dist/cmv-rules-engine.jar" todir="${directory.base}/WEB-INF/lib"/>
-	-->	
+	 	<copy file="${directory.base}/../GardenersDelightDomainObjects/dist/gdelight-domain-objects.jar" todir="${directory.base}/WebContent/WEB-INF/lib"/>
+		<copy file="${directory.base}/../GardenersDelightTools/dist/gdelight-tools.jar" todir="${directory.base}/WebContent/WEB-INF/lib"/>
+		<copy file="${directory.base}/WebContent/WEB-INF/log4j.properties" todir="${directory.build}/classes"/>
+		
 		<war destfile="${directory.dist}/GDelightService.war" webxml="${directory.WEB-INF}/web.xml">
 			<fileset dir="${directory.base}/WebContent">
 				<include name="*.jsp"/>
