@@ -11,6 +11,7 @@ import com.gdelight.domain.request.SignupRequestBean;
 import com.gdelight.domain.response.SignupResponseBean;
 import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.dao.SignupDAO;
+import com.gdelight.server.helper.AbstractRequestHelper;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.json.JsonUtils;
 
@@ -78,7 +79,7 @@ public class SignupRequestHelper extends AbstractRequestHelper {
 		response.setStatus(STATUS_TYPE.FAILED);
 		return response;
 	}
-	
+
 	@Override
 	public String convertResponseBeanToJson(BaseResponseBean bean) {
 		

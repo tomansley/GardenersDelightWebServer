@@ -14,7 +14,6 @@ import com.gdelight.domain.base.BaseRequestBean.TRANSACTION_TYPE;
 import com.gdelight.domain.item.Item;
 import com.gdelight.domain.request.FindAvailableRequestBean;
 import com.gdelight.tools.json.JsonUtils;
-import com.gdelight.tools.string.StringUtils;
 
 public class PostServiceTest {
 	
@@ -209,6 +208,7 @@ public class PostServiceTest {
 		log.debug("FindAvailableRequestBean - " + json);
 		
 		log.debug("--------------------------------------------------------------------");
+		
 	}
 	
 }

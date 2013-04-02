@@ -16,7 +16,6 @@ import com.gdelight.domain.response.LoginResponseBean;
 import com.gdelight.server.dao.LoginDAO;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.json.JsonUtils;
-
 /**
  * This class is a helper to gather all data after the user has logged in and return it for display on
  * the home page.  All fields are populated as necessary on the request.
@@ -64,7 +63,7 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 	@Override
 	public String convertResponseBeanToJson(BaseResponseBean bean) {
 
-		LoginResponseBean response = (LoginResponseBean) bean;
+		LoginResponseBean response = new LoginResponseBean();
 		
 		List<ItemGroup> available = new ArrayList<ItemGroup>();
 		

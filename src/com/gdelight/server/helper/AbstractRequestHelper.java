@@ -38,6 +38,7 @@ public abstract class AbstractRequestHelper {
 	public abstract BaseResponseBean process(BaseRequestBean data);
 	
 	/**
+<<<<<<< HEAD
 	 * Method to process the request if an error has occured.
 	 * @param data the data being processed.  This data is received via the posting service and converted from Json.
 	 * @return the request bean holding the new processed information.
@@ -45,6 +46,8 @@ public abstract class AbstractRequestHelper {
 	public abstract BaseResponseBean processErrorResponse(BaseRequestBean data);
 	
 	/**
+=======
+>>>>>>> branch 'master' of https://github.com/tomansley/GardenersDelightWebServer.git
 	 * Method to convert the requests response back to Json format.  This Json is then returned in the response to the client.
 	 * @param data the request bean holding the response data.
 	 * @return the XML string 

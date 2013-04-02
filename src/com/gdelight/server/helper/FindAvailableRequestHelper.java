@@ -64,6 +64,7 @@ public class FindAvailableRequestHelper extends AbstractRequestHelper {
 	}
 	
 	@Override
+
 	public String convertResponseBeanToJson(BaseResponseBean bean) {
 		
 		FindAvailableResponseBean response = (FindAvailableResponseBean) bean;

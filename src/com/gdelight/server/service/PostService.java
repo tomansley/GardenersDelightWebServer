@@ -45,7 +45,6 @@ public class PostService {
 
 		Long startTime = System.currentTimeMillis();
 		log.debug("postService Request - " + jsonData);
-
 		UserBean user = null;
 		String responseStr = null;
 		BaseRequestBean request = new StarterRequestBean();
@@ -61,7 +60,8 @@ public class PostService {
 		try {
 						
 			jsonData = this.cleanInputData(jsonData);
-			
+			//replace any ampersands that might exist before parsing
+			jsonData = XMLUtils.escapeIllegalXMLCharacters(jsonData);
 			log.debug("Clean postService Request - " + jsonData);
 			
 			request = (StarterRequestBean) JsonUtils.parseJSonDocument(jsonData, StarterRequestBean.class);
@@ -69,7 +69,7 @@ public class PostService {
 			//if the XML doc parsed successfully then place into helper
 			((ProcessingErrorRequestHelper) helper).setJsonDocument(jsonData);
 			
-			//now that we know the transaction type we can create the corresponding helper
+			//now that we know the transaction type we can create the corresponding bean
 			if (request.getTransactionType() == null) {
 				request.addError(new RequestErrorBean(20002), STATUS_TYPE.REJECTED);
 			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.LOGIN)) {
