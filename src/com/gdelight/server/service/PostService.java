@@ -27,7 +27,7 @@ import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.helper.AbstractRequestHelper;
 import com.gdelight.server.helper.FindAvailableRequestHelper;
 import com.gdelight.server.helper.LoginRequestHelper;
-import com.gdelight.server.helper.MakeAvailableRequestHelper;
+import com.gdelight.server.helper.HaveAvailableRequestHelper;
 import com.gdelight.server.helper.PostServiceHelper;
 
 import com.gdelight.server.helper.ProcessingErrorRequestHelper;
@@ -74,8 +74,8 @@ public class PostService {
 				request.addError(new RequestErrorBean(20002), STATUS_TYPE.REJECTED);
 			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.LOGIN)) {
 				helper = new LoginRequestHelper(jsonData);
-			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.MAKE_AVAILABLE)) {
-				helper = new MakeAvailableRequestHelper(jsonData);
+			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.HAVE_AVAILABLE)) {
+				helper = new HaveAvailableRequestHelper(jsonData);
 			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.FIND_AVAILABLE)) {
 				helper = new FindAvailableRequestHelper(jsonData);
 			} else if (request.getTransactionType().equals(TRANSACTION_TYPE.SIGNUP)) {

@@ -9,10 +9,11 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import com.gdelight.domain.base.BaseRequestBean;
-import com.gdelight.domain.item.AvailableItem;
 import com.gdelight.domain.item.Item;
+import com.gdelight.domain.item.ItemGroup;
 import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.service.PostServiceException;
+import com.gdelight.tools.string.StringUtils;
 
 public class FindAvailableDAO extends AbstractGDelightDAO {
 
@@ -23,18 +24,18 @@ public class FindAvailableDAO extends AbstractGDelightDAO {
 		super(user);
 	}
 	
-	public List<AvailableItem> findAvailable(List<Item> items, Double latitude, Double longitude, Integer radius) throws PostServiceException {
+	public List<ItemGroup> findAvailable(List<Item> items, Double latitude, Double longitude, Integer radius) throws PostServiceException {
 		log.debug("Starting findAvailable");
 		
-		List<AvailableItem> availableItems = findItems(items, latitude, longitude, radius);
+		List<ItemGroup> availableItems = findItems(items, latitude, longitude, radius);
 		
 		log.debug("Finished findAvailable");
 		return availableItems;
 	}
 	
-	private List<AvailableItem> findItems(List<Item> items, Double latitude, Double longitude, Integer radius) throws PostServiceException {
+	private List<ItemGroup> findItems(List<Item> items, Double latitude, Double longitude, Integer radius) throws PostServiceException {
 		
-		List<AvailableItem> availableItems = new ArrayList<AvailableItem>();
+		List<ItemGroup> availableItems = new ArrayList<ItemGroup>();
 		
 		try {
 	
@@ -47,12 +48,12 @@ public class FindAvailableDAO extends AbstractGDelightDAO {
 				if (item.getName().toLowerCase().equals(ALL)) {
 					itemNames.append("");
 				} else {
-					itemNames.append(item.getName());
+					itemNames.append(StringUtils.escapeIllegalSQLChars(item.getName()));
 				}
 				itemNames.append("%'");
 				if (!item.getSubGroup().equals("")) {
 					itemNames.append(" AND subgroup = '");
-					itemNames.append(item.getSubGroup());
+					itemNames.append(StringUtils.escapeIllegalSQLChars(item.getSubGroup()));
 					itemNames.append("'");
 				}
 				itemNames.append(") OR ");
@@ -64,13 +65,15 @@ public class FindAvailableDAO extends AbstractGDelightDAO {
 				"SELECT *, 3956 * 2 * ASIN(SQRT( POWER(SIN((" + latitude + " - abs(location.latitude)) * pi()/180 / 2),2) " +
 					"+ COS(" + latitude + " * pi()/180 ) * COS(abs(location.latitude) *  pi()/180) * POWER(SIN((" + longitude + " - location.longitude) *  pi()/180 / 2), 2) )) as distance " +
 				"FROM available item " +
+					"INNER JOIN user_profile user " +
+						"ON user.email = item.email " +
 					"INNER JOIN user_location location " +
 						"ON item.email = location.email " +
 							"AND item.location = location.type " +
 				"WHERE true = true AND " + itemNames + " " +
 					"AND item.active = true " +
 				"HAVING distance < " + radius + " " +
-				"ORDER BY distance " +
+				"ORDER BY user.email, distance " +
 				"LIMIT 50");
 						
 			log.debug("SQL = " + sqlBuffer.toString());
@@ -97,29 +100,47 @@ public class FindAvailableDAO extends AbstractGDelightDAO {
 	 * @return the list of JobData objects.
 	 * @throws JobDataException
 	 */
-	private static List<AvailableItem> getDataFromResultSet(ResultSet rs) {
+	private static List<ItemGroup> getDataFromResultSet(ResultSet rs) {
 
-		List<AvailableItem> dataList = new ArrayList<AvailableItem>();
-
+		List<ItemGroup> dataList = new ArrayList<ItemGroup>();
+		
 		try {
 
 			//go through the rows adding the data
-			AvailableItem item = null;	
-			while (rs.next()) {
+			ItemGroup items = new ItemGroup();
+			Item item = null;
 
-				item = new AvailableItem();
+			while (rs.next()) {
+				
+				String username = rs.getString(DatabaseNames.FIELD_EMAIL);
+				
+				item = new Item();
 				item.setActive(rs.getBoolean(DatabaseNames.FIELD_ACTIVE));
 				item.setAmount(rs.getString(DatabaseNames.FIELD_AMOUNT));
 				item.setDateCreated(rs.getTimestamp(DatabaseNames.FIELD_DATE_CREATED));
-				item.setLatitude(rs.getDouble(DatabaseNames.FIELD_LATITUDE));
-				item.setLongitude(rs.getDouble(DatabaseNames.FIELD_LONGITUDE));
 				item.setName(rs.getString(DatabaseNames.FIELD_NAME));
 				item.setSubGroup(rs.getString(DatabaseNames.FIELD_SUB_GROUP));
-				item.setDistance(rs.getDouble(DatabaseNames.FIELD_DISTANCE));
 
-				dataList.add(item);
-
+				if (items.getUsername().equals("")) {
+					items.setUsername(username);
+					items.setLocation(rs.getString(DatabaseNames.FIELD_LOCATION));
+					items.setLatitude(rs.getDouble(DatabaseNames.FIELD_LATITUDE));
+					items.setLongitude(rs.getDouble(DatabaseNames.FIELD_LONGITUDE));
+					items.setDistance(rs.getDouble(DatabaseNames.FIELD_DISTANCE));
+					items.setOrganic(rs.getBoolean(DatabaseNames.FIELD_ORGANIC));
+				}
+				
+				if (username.equals(items.getUsername())) {
+					items.addItem(item);
+				} else {
+					dataList.add(items);
+					items = new ItemGroup();
+					items.addItem(item);				
+				}
+				
 			}
+			
+			dataList.add(items);
 
 		} catch (Exception e) {
 			e.printStackTrace();

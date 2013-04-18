@@ -14,6 +14,7 @@ import com.gdelight.domain.base.BaseRequestBean.TRANSACTION_TYPE;
 import com.gdelight.domain.item.Item;
 import com.gdelight.domain.request.FindAvailableRequestBean;
 import com.gdelight.tools.json.JsonUtils;
+import com.gdelight.tools.string.StringUtils;
 
 public class PostServiceTest {
 	
@@ -22,11 +23,11 @@ public class PostServiceTest {
 
 	public static void main(String[] args) {
 		
-		String type = "external";
+		String type = "internal";
 		String email = "tomansley@gmail.com" + System.currentTimeMillis();
 		String password = "test";
-		String url = "http://localhost:8080/GDelightService/services/postService/";
-		//String url = "http://gdelight.elasticbeanstalk.com/services/postService/";
+		//String url = "http://localhost:8080/GDelightService/services/postService/";
+		String url = "http://gdelight.elasticbeanstalk.com/services/postService/";
 		//String url = "http://cmvstaging.mobi/CMVPostService/services/postService/";
 		//String url = "https://www.cmvpost.com/CMVPostService/services/postService/";
 
@@ -82,6 +83,7 @@ public class PostServiceTest {
 		return "{\"transactionType\":\"SIGNUP\"," +
 				   "\"userId\":\"" + email + "\"," +
 				   "\"token\":\"" + password + "\"," +
+			   	   "\"firstName\":\"Tom\"," +
 			   	   "\"latitude\":\"41.866381\"," +
 			       "\"longitude\":\"-87.621374\"}";
 
@@ -98,7 +100,7 @@ public class PostServiceTest {
 	
 	public static String getMakeAvailableJson(String email, String password) {
 		
-		return "{\"transactionType\":\"MAKE_AVAILABLE\"," +
+		return "{\"transactionType\":\"HAVE_AVAILABLE\"," +
 				   		  "\"userId\":\"" + email + "\"," +
 						   "\"token\":\"" + password + "\"," +
 				   		  "\"latitude\":\"41.866381\"," +
@@ -123,7 +125,7 @@ public class PostServiceTest {
 						   "\"token\":\"" + password + "\"," +
 				   		  "\"latitude\":\"41.866381\"," +
 				   		  "\"longitude\":\"-87.621374\"," +
-				   		  "\"radius\":\"3\"," +
+				   		  "\"radius\":\"30\"," +
 				   		  "\"findItems\":[" +
 								"{\"name\":\"Apples\",\"subGroup\":\"\"}," +
 								"{\"name\":\"Oranges\",\"subGroup\":\"Gardner\"}]" +

@@ -26,16 +26,17 @@ public class SignupDAO extends BaseDAO {
 
 	}
 	
-	public UserBean createUser(String userId, String password, Double latitude, Double longitude) throws PostServiceException {
+	public UserBean createUser(String userId, String password, Double latitude, Double longitude, String firstName) throws PostServiceException {
 		log.debug("Starting createUser");
 		
 		UserProfileDAO dao = new UserProfileDAO();
 		
 		Properties props = new Properties();
-		props.setProperty(UserProfileDAO.USERNAME, userId);
-		props.setProperty(UserProfileDAO.PASSWORD, password);
-		props.put(UserProfileDAO.FIELD_LATITUDE, latitude);
-		props.put(UserProfileDAO.FIELD_LONGITUDE, longitude);
+		props.setProperty(DatabaseNames.FIELD_EMAIL, userId);
+		props.setProperty(DatabaseNames.FIELD_PASSWORD, password);
+		props.put(DatabaseNames.FIELD_LATITUDE, latitude);
+		props.put(DatabaseNames.FIELD_LONGITUDE, longitude);
+		props.put(DatabaseNames.FIELD_FIRST_NAME, firstName);
 		
 		UserBean user = dao.createUser(props);
 		

@@ -40,7 +40,9 @@ public class SignupRequestHelper extends AbstractRequestHelper {
 	@Override
 	public BaseResponseBean process(BaseRequestBean dataInput) {
 
+		
 		SignupRequestBean data = (SignupRequestBean) dataInput;
+		log.debug("FIRST NAME = " + data.getFirstName());
 		SignupResponseBean response = new SignupResponseBean();
 				
 		SignupDAO dao = new SignupDAO();
@@ -51,7 +53,7 @@ public class SignupRequestHelper extends AbstractRequestHelper {
 			if (dao.isUsernameAvailable(data.getUserId())) {
 				
 				//create new user
-				UserBean user = dao.createUser(data.getUserId(), data.getToken(), data.getLatitude(), data.getLongitude());
+				UserBean user = dao.createUser(data.getUserId(), data.getToken(), data.getLatitude(), data.getLongitude(), data.getFirstName());
 				
 				//everything is good so set success status.
 				response.setStatus(STATUS_TYPE.SUCCESS);
@@ -99,7 +101,7 @@ public class SignupRequestHelper extends AbstractRequestHelper {
 			dao.addPostRequestResults(data);
 		} catch (PostServiceException e) {
 			e.printStackTrace();
-			log.debug("The loan output from the above stacktrace - " + data);
+			log.debug("The output from the above stacktrace - " + data);
 			isPosted = false;
 		}
 		return isPosted;

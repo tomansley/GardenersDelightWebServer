@@ -62,29 +62,8 @@ public class LoginRequestHelper extends AbstractRequestHelper {
 
 	@Override
 	public String convertResponseBeanToJson(BaseResponseBean bean) {
-
-		LoginResponseBean response = new LoginResponseBean();
 		
-		List<ItemGroup> available = new ArrayList<ItemGroup>();
-		
-		ItemGroup group = new ItemGroup();
-		group.setName("Seeds");
-		
-		Item seeds = new Item();
-		seeds.setName("Awesome Apple Seeds");
-		seeds.setAmount("Lots");
-		group.addItem(seeds);
-				
-		seeds = new Item();
-		seeds.setName("Awesome Cherry Seeds");
-		seeds.setAmount("Little");
-		group.addItem(seeds);
-		
-		available.add(group);
-
-		response.setAvailable(available);
-		
-		String json = JsonUtils.getJSonDocument(response);
+		String json = JsonUtils.getJSonDocument(bean);
 		
 		return json;
 	}

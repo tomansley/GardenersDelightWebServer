@@ -6,10 +6,10 @@ import com.gdelight.domain.base.BaseRequestBean;
 import com.gdelight.domain.base.BaseResponseBean;
 import com.gdelight.domain.base.BaseResponseBean.STATUS_TYPE;
 import com.gdelight.domain.base.ErrorException;
-import com.gdelight.domain.request.MakeAvailableRequestBean;
-import com.gdelight.domain.response.MakeAvailableResponseBean;
+import com.gdelight.domain.request.HaveAvailableRequestBean;
+import com.gdelight.domain.response.HaveAvailableResponseBean;
 import com.gdelight.server.dao.LoginDAO;
-import com.gdelight.server.dao.MakeAvailableDAO;
+import com.gdelight.server.dao.HaveAvailableDAO;
 import com.gdelight.server.service.PostServiceException;
 import com.gdelight.tools.json.JsonUtils;
 
@@ -17,20 +17,20 @@ import com.gdelight.tools.json.JsonUtils;
  * This class is a helper to save the new items that have been made available by the user.
  * @author tomansley
  */
-public class MakeAvailableRequestHelper extends AbstractRequestHelper {
+public class HaveAvailableRequestHelper extends AbstractRequestHelper {
 
-	private static Logger log = Logger.getLogger(MakeAvailableRequestHelper.class);
+	private static Logger log = Logger.getLogger(HaveAvailableRequestHelper.class);
 
 	private static boolean hasLoadedMessages = false;
 
-	public MakeAvailableRequestHelper(String jsonData) {
+	public HaveAvailableRequestHelper(String jsonData) {
 		super(jsonData);
 	}
 
 	@Override
 	public BaseRequestBean convertJsonToRequestBean() {
 
-		BaseRequestBean request = (MakeAvailableRequestBean) JsonUtils.parseJSonDocument(jsonData, MakeAvailableRequestBean.class);
+		BaseRequestBean request = (HaveAvailableRequestBean) JsonUtils.parseJSonDocument(jsonData, HaveAvailableRequestBean.class);
 
 		return request;
 	}
@@ -38,12 +38,12 @@ public class MakeAvailableRequestHelper extends AbstractRequestHelper {
 	@Override
 	public BaseResponseBean process(BaseRequestBean dataInput) {
 
-		MakeAvailableResponseBean response = new MakeAvailableResponseBean();
-		MakeAvailableRequestBean data = (MakeAvailableRequestBean) dataInput;
+		HaveAvailableResponseBean response = new HaveAvailableResponseBean();
+		HaveAvailableRequestBean data = (HaveAvailableRequestBean) dataInput;
 		
 		//insert the groups of items here.
 		try {
-			MakeAvailableDAO dao = new MakeAvailableDAO(data.getUser());
+			HaveAvailableDAO dao = new HaveAvailableDAO(data.getUser());
 			dao.makeAvailable(data.getAvailable());
 			response.setStatus(STATUS_TYPE.SUCCESS);
 		} catch (PostServiceException e) {
@@ -56,7 +56,7 @@ public class MakeAvailableRequestHelper extends AbstractRequestHelper {
 
 	@Override
 	public BaseResponseBean processErrorResponse(BaseRequestBean data) {
-		MakeAvailableResponseBean response = new MakeAvailableResponseBean();
+		HaveAvailableResponseBean response = new HaveAvailableResponseBean();
 		response.setUser(data.getUser());
 		response.setErrors(data.getErrors());
 		response.setStatus(STATUS_TYPE.FAILED);
@@ -66,7 +66,7 @@ public class MakeAvailableRequestHelper extends AbstractRequestHelper {
 	@Override
 	public String convertResponseBeanToJson(BaseResponseBean bean) {
 		
-		MakeAvailableResponseBean response = (MakeAvailableResponseBean) bean;
+		HaveAvailableResponseBean response = (HaveAvailableResponseBean) bean;
 		
 		
 		String json = JsonUtils.getJSonDocument(response);

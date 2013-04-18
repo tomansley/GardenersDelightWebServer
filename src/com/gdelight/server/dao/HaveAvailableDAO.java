@@ -1,7 +1,6 @@
 package com.gdelight.server.dao;
 
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,32 +11,21 @@ import com.gdelight.domain.item.Item;
 import com.gdelight.domain.item.ItemGroup;
 import com.gdelight.domain.user.UserBean;
 import com.gdelight.server.service.PostServiceException;
-import com.gdelight.tools.dao.SimpleData;
+import com.gdelight.tools.string.StringUtils;
 
-public class MakeAvailableDAO extends AbstractGDelightDAO {
+public class HaveAvailableDAO extends AbstractGDelightDAO {
 
-	private static Logger log = Logger.getLogger(MakeAvailableDAO.class);
-	private static List<String> groupNames = null;
+	private static Logger log = Logger.getLogger(HaveAvailableDAO.class);
 	
-	public MakeAvailableDAO(UserBean user) throws PostServiceException {
+	public HaveAvailableDAO(UserBean user) throws PostServiceException {
 		super(user);
-		if (groupNames == null) {
-			groupNames = getGroupNames();
-		}
 	}
 	
 	public List<ItemGroup> makeAvailable(List<ItemGroup> items) throws PostServiceException {
 		log.debug("Starting makeAvailable");
 		
 		for (ItemGroup group: items) {
-			
-			//check name of group is legitimate.
-			if (groupNames.contains(group.getName())) {
-				insertItems(group);
-			} else {
-				throw new PostServiceException("An attempt has been made to add items for a group that does not exist.");
-			}
-			
+			insertItems(group);
 		}
 		
 		log.debug("Finished makeAvailable");
@@ -52,12 +40,12 @@ public class MakeAvailableDAO extends AbstractGDelightDAO {
 			
 				StringBuffer sqlBuffer = new StringBuffer("INSERT INTO " + DatabaseNames.TABLE_AVAILABLE + " (name, amount, subGroup, group_name, email, location) VALUES (");
 						
-				sqlBuffer.append("'" + item.getName() + "',");
+				sqlBuffer.append("'" + StringUtils.escapeIllegalSQLChars(item.getName()) + "',");
 				sqlBuffer.append("'" + item.getAmount() + "',");
-				sqlBuffer.append("'" + item.getSubGroup() + "',");
-				sqlBuffer.append("'" + group.getName() + "',");
+				sqlBuffer.append("'" + StringUtils.escapeIllegalSQLChars(item.getSubGroup()) + "',");
+				sqlBuffer.append("'" + StringUtils.escapeIllegalSQLChars(group.getName()) + "',");
 				sqlBuffer.append("'" + this.getUser().getEmail() + "',");
-				sqlBuffer.append("'" + group.getLocation() + "'");
+				sqlBuffer.append("'" + StringUtils.escapeIllegalSQLChars(group.getLocation()) + "'");
 
 				sqlBuffer.append(")");
 		
@@ -100,7 +88,7 @@ public class MakeAvailableDAO extends AbstractGDelightDAO {
 
 	}
 	
-	private List<String> getGroupNames() throws PostServiceException {
+	/*private List<String> getGroupNames() throws PostServiceException {
 		List<String> groupNames = new ArrayList<String>();
 		try {
 			
@@ -118,7 +106,7 @@ public class MakeAvailableDAO extends AbstractGDelightDAO {
 		}
 
 		return groupNames;
-	}
+	}*/
 	
 }
 

@@ -19,15 +19,6 @@ import com.gdelight.tools.dao.BaseDAO;
 
 public class UserProfileDAO extends BaseDAO {
 
-	public static final String USERNAME = "username";
-	public static final String PASSWORD = "password";
-	public static final String FIELD_FIRST_NAME = "first_name";
-	public static final String FIELD_LAST_NAME = "last_name";
-	public static final String FIELD_ACTIVE = "active";
-	public static final String FIELD_EMAIL = "email";
-	public static final String FIELD_PASSWORD = "password";
-	public static final String FIELD_LONGITUDE = "longitude";
-	public static final String FIELD_LATITUDE = "latitude";
 	public static final String IS_ACTIVE = "1";
 	public static final String IS_NOT_ACTIVE = "0";
 
@@ -48,9 +39,9 @@ public class UserProfileDAO extends BaseDAO {
 	 */
 	public UserBean getUser(String email, String password) throws PostServiceException {
 		Properties properties = new Properties();
-		properties.setProperty(FIELD_ACTIVE, IS_ACTIVE);
-		properties.setProperty(FIELD_EMAIL, email);
-		properties.setProperty(FIELD_PASSWORD, password);
+		properties.setProperty(DatabaseNames.FIELD_ACTIVE, IS_ACTIVE);
+		properties.setProperty(DatabaseNames.FIELD_EMAIL, email);
+		properties.setProperty(DatabaseNames.FIELD_PASSWORD, password);
 		List<UserBean> users = getUsers(properties);
 		
 		UserBean user = null;
@@ -75,7 +66,7 @@ public class UserProfileDAO extends BaseDAO {
 	 */
 	public Boolean isUsernameAvailable(String email) throws PostServiceException {
 		Properties properties = new Properties();
-		properties.setProperty(FIELD_EMAIL, email);
+		properties.setProperty(DatabaseNames.FIELD_EMAIL, email);
 		List<UserBean> users = getUsers(properties);
 		Boolean isAvailable = false;
 		
@@ -107,11 +98,12 @@ public class UserProfileDAO extends BaseDAO {
 		
 		try {
 	
-			StringBuffer sqlBuffer = new StringBuffer("INSERT INTO " + DatabaseNames.USER_PROFILE + " (email, password, longitude, latitude) VALUES ('" + 
-				props.getProperty(USERNAME) + "','" + 
-				props.getProperty(PASSWORD) + "'," +
-				props.get(FIELD_LONGITUDE) + "," +
-				props.get(FIELD_LATITUDE) + ")");
+			StringBuffer sqlBuffer = new StringBuffer("INSERT INTO " + DatabaseNames.USER_PROFILE + " (email, password, first_name, longitude, latitude) VALUES ('" + 
+				props.getProperty(DatabaseNames.FIELD_EMAIL) + "','" + 
+				props.getProperty(DatabaseNames.FIELD_PASSWORD) + "','" +
+				props.getProperty(DatabaseNames.FIELD_FIRST_NAME) + "'," +
+				props.get(DatabaseNames.FIELD_LONGITUDE) + "," +
+				props.get(DatabaseNames.FIELD_LATITUDE) + ")");
 	
 			log.debug("SQL = " + sqlBuffer.toString());
 			
@@ -120,9 +112,9 @@ public class UserProfileDAO extends BaseDAO {
 			ps.execute();
 			
 			sqlBuffer = new StringBuffer("INSERT INTO " + DatabaseNames.USER_LOCATION + " (email, type, longitude, latitude) VALUES ('" + 
-					props.getProperty(USERNAME) + "','Main Location'," +
-					props.get(FIELD_LONGITUDE) + "," +
-					props.get(FIELD_LATITUDE) + ")");
+					props.getProperty(DatabaseNames.FIELD_EMAIL) + "','Main Location'," +
+					props.get(DatabaseNames.FIELD_LONGITUDE) + "," +
+					props.get(DatabaseNames.FIELD_LATITUDE) + ")");
 		
 			log.debug("SQL = " + sqlBuffer.toString());
 			
@@ -131,11 +123,11 @@ public class UserProfileDAO extends BaseDAO {
 			ps.execute();
 				
 			user = new UserBean();
-			user.setEmail(props.getProperty(USERNAME));
-			user.setToken(props.getProperty(PASSWORD));
-			user.setLatitude((Double) props.get(FIELD_LATITUDE));
-			user.setLongitude((Double) props.get(FIELD_LONGITUDE));
-			user.setToken(props.getProperty(PASSWORD));
+			user.setEmail(props.getProperty(DatabaseNames.FIELD_EMAIL));
+			user.setToken(props.getProperty(DatabaseNames.FIELD_PASSWORD));
+			user.setLatitude((Double) props.get(DatabaseNames.FIELD_LATITUDE));
+			user.setLongitude((Double) props.get(DatabaseNames.FIELD_LONGITUDE));
+			user.setFirstName(props.getProperty(DatabaseNames.FIELD_FIRST_NAME));
 			user.setActive(true);
 			user.setTokenValid(true);
 			
@@ -220,13 +212,13 @@ public class UserProfileDAO extends BaseDAO {
 
 				data = new UserBean();
 
-				data.setFirstName(rs.getString(FIELD_FIRST_NAME));
-				data.setLastName(rs.getString(FIELD_LAST_NAME));
-				data.setActive(rs.getBoolean(FIELD_ACTIVE));
-				data.setEmail(rs.getString(FIELD_EMAIL));
-				data.setToken(rs.getString(FIELD_PASSWORD));
-				data.setLatitude(rs.getDouble(FIELD_LATITUDE));
-				data.setLongitude(rs.getDouble(FIELD_LONGITUDE));
+				data.setFirstName(rs.getString(DatabaseNames.FIELD_FIRST_NAME));
+				data.setLastName(rs.getString(DatabaseNames.FIELD_LAST_NAME));
+				data.setActive(rs.getBoolean(DatabaseNames.FIELD_ACTIVE));
+				data.setEmail(rs.getString(DatabaseNames.FIELD_EMAIL));
+				data.setToken(rs.getString(DatabaseNames.FIELD_PASSWORD));
+				data.setLatitude(rs.getDouble(DatabaseNames.FIELD_LATITUDE));
+				data.setLongitude(rs.getDouble(DatabaseNames.FIELD_LONGITUDE));
 
 				dataList.add(data);
 
